@@ -1,0 +1,41 @@
+{% extends "public/templates/public_template.html" %}
+
+{% block title %}Auton hintalaskuri{% endblock %}
+
+{% block main %}
+
+<body>
+    <form action="/hintalaskuri" method="POST" id="carForm">
+        <h1 id="arvo">Selvitä autosi arvo</h1>
+
+        <div class="contentform">
+            <div class="leftcontact">
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="form-button">
+                <button type="submit" class="btn btn-primary">Anna hinta-arvio</button>
+            </div>
+        </div>
+
+        <script>
+            $('#carForm').on('submit', function (event) {
+                $('#price-text').text("Analysoidaan").delay(1500)
+                event.preventDefault();
+                $.ajax({
+                    type : 'POST',
+                    url : '/hintalaskuri',
+                    data: {}
+                })
+                .done(function(data) {
+                    $('#price-text').text(data.teksti);
+                });
+            });
+        </script>
+
+        <h1 class="float-center" id='price-text'></h1>
+    </form>
+</body>
+
+</html>
+{% endblock %}
