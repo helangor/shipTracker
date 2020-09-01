@@ -1,0 +1,102 @@
+{% extends "public/templates/public_template.html" %}
+
+{% block title %}Tietoa{% endblock %}
+
+{% block main %}
+<meta id="cordinates" data-name="{{name}}" data-other="{{other}}">
+<div class="container">
+  <div class="row header-row">
+    <div class="col-md-4 ship-details roboto"><span class="float-left">
+        <h3>Ship details</h3>
+
+        <p><strong>Ship name: </strong><span id="ship-name">{{ name }}</span></p>
+        <p><strong>MMSI: </strong><span id="mmsi">{{ mmsi }}</span></p>
+        <p><strong>Length and width: </strong><span id="length">{{ length }}</span><span>/</span><span
+            id="width">{{ width }}</span> m</p>
+        <p><strong>Draught: </strong><span id="draught">{{ draught }}</span><span> m</span></p>
+        <p><strong>Country: </strong><span id="flag">{{ flag }}</span></p>
+        <p><strong>Ship type: </strong><span id="ship_type">{{ ship_type }}</span></p>
+
+        <h3>Trip details</h3>
+        <p><strong>Distance from Mustola: </strong><span id="distance">{{ distance }}</span> <span>km</span> </p>
+        <p><strong>Destination: </strong><span id="destination">{{ destination }}</span></p>
+        <p><strong>Speed: </strong><span id="speed">{{ speed }}</span><span> knots</span> </p>
+        <p><strong>Navigation status: </strong><span id="nav_stat">{{ nav_stat }}</span></p>
+        <p hidden id=latitude>{{ latitude }}</p>
+        <p hidden id=longitude>{{ longitude }}</p>
+    </div>
+    <div class="col-md-4 ship-photo">
+      <img src={{ image }} alt="Ship photo">
+    </div>
+  </div>
+
+  <!-- Lisätään kartta mukaan, jossa näkyy laiva -->
+  <div class="row">
+    <div class="col-md-12"><span>
+        <h3>Ship location on map</h3>
+        <div id="map"></div>
+        <script defer
+          src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC7RqiI1IT985csNB4X2AfHSytWHacYy7c&callback=initMap"></script>
+
+        <script>
+          var marker = "";
+          var map = "";
+
+          function moveMarker() {
+            var lat = parseFloat($('#latitude').html());
+            var lng = parseFloat($('#longitude').html());
+            var newLatLng = new google.maps.LatLng(lat, lng);
+            marker.setPosition(newLatLng);
+            map.setCenter(newLatLng);
+          }
+
+          function initMap() {
+            var lat = parseFloat($('#latitude').html())
+            var lng = parseFloat($('#longitude').html())
+            var ship = { lat: lat, lng: lng }; // The location of ship
+            map = new google.maps.Map(document.getElementById('map'), { zoom: 14, center: ship });
+
+            //custom icon
+            var icon = {
+              url: "https://image.flaticon.com/icons/svg/2928/2928743.svg",
+              scaledSize: new google.maps.Size(50, 50), // scaled size
+            };
+
+            // The marker, positioned at ship
+            marker = new google.maps.Marker({
+              position: new google.maps.LatLng(lat, lng),
+              map: map,
+              icon: icon
+            });
+          }
+
+          //Päivittää laivojen tiedot 5s välein
+          setInterval(function () {
+            $.ajax({
+              type: 'POST',
+              url: '/',
+            })
+              .done(function (data) {
+                console.log(data.nav_stat)
+                $('#ship-name').text(data.name);
+                $('#mmsi').text(data.mmsi);
+                $('#length').text(data.length);
+                $('#width').text(data.width);
+                $('#draught').text(data.draught);
+                $('#flag').text(data.flag);
+                $('#ship_type').text(data.ship_type);
+                $('#distance').text(data.distance);
+                $('#destination').text(data.destination);
+                $('#speed').text(data.speed);
+                $('#nav_stat').text(data.nav_stat);
+                $('#latitude').text(data.latitude);
+                $('#longitude').text(data.longitude);
+                moveMarker();
+              });
+          }, 5000);
+        </script>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

@@ -179,8 +179,11 @@ def fetch_ships():
 
     #Sets api_call parameters
     home_coordinates = [61.058983,28.320951]
-    radius = 40
+    radius = 60
     current_time = iso_time()
+
+
+    #Tähän Try Except ja laivoja ei löydy. 
 
     api_call = "https://meri.digitraffic.fi/api/v1/locations/latitude/" + str(home_coordinates[0]) +"/longitude/" + str(home_coordinates[1]) + "/radius/" + str(radius) + "/from/" + current_time
     response = requests.get(api_call)
@@ -212,7 +215,7 @@ def fetch_ships():
     ship_type = get_ship_type (ship_type_number)
 
     #Open connection to mongoDB 
-    client = MongoClient(os.environ['MONGODB'])
+    client = MongoClient('mongodb+srv://dbUser:3NSPv8pakvWLUne@mustola.g1flp.mongodb.net/ships?retryWrites=true&w=majority')
     
     db = client.ships
     shipData = db.shipDetails
@@ -235,24 +238,29 @@ def fetch_ships():
     return (name, mmsi, distance, destination, speed, width, length, flag, image, nav_stat, ship_type, draught, latitude, longitude)
 
 
-@app.route("/")
-def index():
-    return render_template("public/analysator.html")
+@app.route("/", methods=["GET", "POST"])
+def analysator():
+    if request.method == "POST":
+        
+        try:
+            name, mmsi, distance, destination, speed, width, length, flag, image, nav_stat, ship_type, draught, latitude, longitude = fetch_ships()
+            return jsonify({'name':name, 'mmsi':mmsi, 'distance':distance, 'destination':destination, 'speed':speed, 'width':width, 'length':length, 
+            'flag':flag, 'image':image, 'nav_stat':nav_stat, 'ship_type':ship_type, 'draught':draught, 'latitude':latitude, 'longitude':longitude})
+            
+        except: 
+            teksti = ("Laivaa ei saatu haettua")
+            return jsonify({'name' : teksti})
+         
+    name, mmsi, distance, destination, speed, width, length, flag, image, nav_stat, ship_type, draught, latitude, longitude = fetch_ships()
+    cords=[latitude,longitude]
+    
+    return render_template("public/home.html", name=name, mmsi=mmsi, distance=distance, destination=destination, speed=speed, width=width, length=length, 
+    flag=flag, image=image, nav_stat=nav_stat, ship_type=ship_type, draught=draught, cords=cords, latitude=latitude, longitude=longitude)
+
 
 @app.route("/tietoa")
 def about():
     return render_template("public/about.html")
 
-@app.route("/hintalaskuri", methods=["GET", "POST"])
-def analysator():
-    if request.method == "POST":
-        
-        #try:
-        name, mmsi, distance, destination, speed, width, length, flag, image, nav_stat, ship_type, draught, latitude, longitude = fetch_ships()
-        return jsonify({'teksti' : name})
-        
-        #except: 
-        #    teksti = ("Laivaa ei saatu haettua")
-        #    return jsonify({'teksti' : teksti})
-            
-    return render_template("public/analysator.html")
+
+#Muuta radius takaisin 40 ja jos ei laivaa lähellä niin 

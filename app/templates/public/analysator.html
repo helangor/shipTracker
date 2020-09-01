@@ -20,7 +20,7 @@
 
         <script>
             $('#carForm').on('submit', function (event) {
-                $('#price-text').text("Analysoidaan").delay(1500)
+                $('#price-text').text("Analysoidaan").delay(0)
                 event.preventDefault();
                 $.ajax({
                     type : 'POST',
@@ -28,12 +28,26 @@
                     data: {}
                 })
                 .done(function(data) {
-                    $('#price-text').text(data.teksti);
+                    $('#name').text(data.name);
+                    $('#mmsi').text(mmsi.name);
+                    $('#distance').text(distance.name);
+                    $('#destination').text(destination.name);
+                    $('#speed').text(speed.name);
+                    $('#width').text(width.name);
+                    $('#length').text(length.name);
+
                 });
             });
         </script>
+        <h1 class="float-center" id='name'></h1>
+        <h1 class="float-center" id='mmsi'></h1>
+        <h1 class="float-center" id='distance'></h1>
+        <h1 class="float-center" id='destination'></h1>
+        <h1 class="float-center" id='speed'></h1>
+        <h1 class="float-center" id='width'></h1>
+        <h1 class="float-center" id='length'></h1>
 
-        <h1 class="float-center" id='price-text'></h1>
+
     </form>
 </body>
 
