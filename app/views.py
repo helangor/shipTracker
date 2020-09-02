@@ -11,6 +11,10 @@ from bs4 import BeautifulSoup
 from pymongo import MongoClient
 from dotenv import load_dotenv
 
+#TODO Muuta Suomen kielelle
+#TODO Paranna ulkonäköä
+#TODO Hommaa laivoille uusi marker, joka kääntyy suunnan mukaan.
+
 def iso_time():
     current_time = (datetime.utcnow()- timedelta(hours = 0.005)).isoformat().replace(":", "%3A")
     iso_time = current_time[:23] + ".000Z"
@@ -261,6 +265,3 @@ def analysator():
 @app.route("/tietoa")
 def about():
     return render_template("public/about.html")
-
-
-#Muuta radius takaisin 40 ja jos ei laivaa lähellä niin 
