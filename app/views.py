@@ -11,9 +11,11 @@ from bs4 import BeautifulSoup
 from pymongo import MongoClient
 from dotenv import load_dotenv
 
-#TODO Muuta Suomen kielelle
-#TODO Paranna ulkonäköä
+#TODO Muuta Suomen kielelle myös laivojen tyypit
+#TODO Paranna ulkonäköä 
 #TODO Hommaa laivoille uusi marker, joka kääntyy suunnan mukaan.
+#TODO JS erilliseen tiedostoon
+#TODO eta aikaan sulkujen aika korjaukset ja arvio kun sulussa vauhti putoaa 0. Tällöin tulee sulussa?
 
 def iso_time():
     current_time = (datetime.utcnow()- timedelta(hours = 0.005)).isoformat().replace(":", "%3A")

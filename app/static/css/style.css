@@ -40,7 +40,7 @@ padding: 20px 0 20px 0;
 
 /* Set the size of the div element that contains the map */
 #map {
-height: 400px;
+height: 500px;
 width: 100%;
 }
 
@@ -60,5 +60,5 @@ width: 100%;
 
 #shipPhoto {
     padding: 5px;
-    width: 250px;
+    width: 350px;
 }

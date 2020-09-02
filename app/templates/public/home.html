@@ -7,27 +7,21 @@
 <div class="container">
   <div class="row header-row">
     <div class="col-md-4"><span class="float-left">
-        <h5>Tietoa</h5>
+        <h4>Tietoa</h4>
 
         <p><strong>Laivan nimi: </strong><span id="ship-name">{{ name }}</span></p>
-        <p><strong>Pituus/leveys/syväys: </strong><span id="length">{{ length }}</span><span> / </span><span
-            id="width">{{ width }}</span><span> / </span><span id="draught">{{ draught }}</span> m</p>
-        <p><strong>Country: </strong><span id="flag">{{ flag }}</span></p>
-        <p><strong>Ship type: </strong><span id="ship_type">{{ ship_type }}</span></p>
-
-        <p><strong>Distance from Mustola: </strong><span id="distance">{{ distance }}</span> <span>km</span> </p>
-        <p><strong>Destination: </strong><span id="destination">{{ destination }}</span></p>
-        <p><strong>Speed: </strong><span id="speed">{{ speed }}</span><span> knots</span> </p>
-        <p><strong>Navigation status: </strong><span id="navStat">{{ nav_stat }}</span></p>
+        <p><strong>Laivan tyyppi: </strong><span id="shipType">{{ shipType }}</span></p>
+        <p><strong>Maa: </strong><span id="flag">{{ flag }}</span></p>
+        <p><strong>Etäisyys Mustolasta: </strong><span id="distance">{{ distance }}</span> <span>km</span> </p>
+        <p><strong>ETA: </strong><span id="eta">--</span> minuuttia</p>
+        <img id=shipPhoto src={{ image }} alt="Ship photo">
         <p hidden id=latitude>{{ latitude }}</p>
         <p hidden id=longitude>{{ longitude }}</p>
-        <img hidden id=shipPhoto src={{ image }} alt="Ship photo">
-        <p>Paina laivasta saadaksesi lisää tietoa</p>
     </div>
 
 
-    <!-- Kartan ulkopuolelle: Nimi, Maa, Distance
-        Karttaan:  Nimi, MMSI, P/l/s, ship type, destination, speed, nav stat.-->
+    <!-- Kartan ulkopuolelle: Nimi, Maa, Distance, speed, arvioitu saapumisaika, Kuva
+        Karttaan:  Nimi, MMSI, P/l/s, ship type, destination, nav stat.-->
 
     <!--Lisätään kartta, jossa näkyy laiva-->
     <div class="col-md-8">
@@ -48,6 +42,12 @@
           map.setCenter(newLatLng);
         }
 
+        //Laskee kuinka pitkään menee, että laiva saapuu Mustolaan. Voisi käyttää jotain keskinopeutta?
+        function calculateEta(speed, distance) {
+          const eta = Math.round((distance / (speed * 1.852)) * 60)
+          $('#eta').text(eta);
+        }
+
         function initMap() {
           var lat = parseFloat($('#latitude').html())
           var lng = parseFloat($('#longitude').html())
@@ -56,12 +56,12 @@
 
           image = $('#shipPhoto').attr('src');
 
-          //infowindow
-          infowindow = new google.maps.InfoWindow({
-            content: "<div style='float:left'><img id=shipPhoto src=" +
-              image +
-              "></div><div style='float:right; padding: 10px;'><b>Title</b><br/>123 Address<br/> City,Country</div>"
-          });
+          //info window that shows extra data in when the google maps ship icon is clicked on
+          infoWindow = new google.maps.InfoWindow({
+            content: "<div style='float:right; padding: 10px;'>" +
+              "<p><strong>Destination: </strong><span>{{ destination }}</span></p>" +
+              "<p><strong>Speed: </strong><span>{{ speed }}</span></p>" +
+              "<p><strong>Pituus/leveys/syväys: </strong><span>{{ length }}</span><span> / </span><span>{{ width }}</span><span> / </span><span>{{ draught }}</span> m</p>"          });
 
           //custom icon
           var icon = {
@@ -76,7 +76,7 @@
             icon: icon
           });
           marker.addListener("click", () => {
-            infowindow.open(map, marker);
+            infoWindow.open(map, marker);
           });
         }
 
@@ -87,22 +87,22 @@
             url: '/',
           })
             .done(function (data) {
-              console.log(data.nav_stat)
               $('#ship-name').text(data.name);
               $('#mmsi').text(data.mmsi);
               $('#length').text(data.length);
               $('#width').text(data.width);
               $('#draught').text(data.draught);
               $('#flag').text(data.flag);
-              $('#ship_type').text(data.ship_type);
+              $('#shipType').text(data.ship_type);
               $('#distance').text(data.distance);
-              $('#destination').text(data.destination);
-              $('#speed').text(data.speed);
+              destination = data.destination;
+              speed = data.speed;
               $('#navStat').text(data.nav_stat);
               $('#latitude').text(data.latitude);
               $('#longitude').text(data.longitude);
               $('#shipPhoto').attr('src', data.image);
               moveMarker();
+              calculateEta(data.speed, data.distance);
             });
         }, 5000);
       </script>
