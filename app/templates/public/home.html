@@ -1,14 +1,20 @@
 {% extends "public/templates/public_template.html" %}
 
-{% block title %}Tietoa{% endblock %}
+{% block title %}Laivatutka{% endblock %}
 
 {% block main %}
 <meta id="cordinates" data-name="{{name}}" data-other="{{other}}">
 <div class="container">
-  <div class="row header-row">
+
+  <!--Div which shows when no ships are coming towards to Mustola-->
+  <div class="row header-row" id="noShips">
+    <h1>Ei laivoja lähistöllä</h1>
+  </div>
+
+  <!--Div which shows when ships are coming towards to Mustola-->
+  <div class="row header-row" id="shipData">
     <div class="col-md-4"><span class="float-left">
         <h4>Tietoa</h4>
-
         <p><strong>Laivan nimi: </strong><span id="ship-name">{{ name }}</span></p>
         <p><strong>Laivan tyyppi: </strong><span id="shipType">{{ shipType }}</span></p>
         <p><strong>Maa: </strong><span id="flag">{{ flag }}</span></p>
@@ -18,10 +24,6 @@
         <p hidden id=latitude>{{ latitude }}</p>
         <p hidden id=longitude>{{ longitude }}</p>
     </div>
-
-
-    <!-- Kartan ulkopuolelle: Nimi, Maa, Distance, speed, arvioitu saapumisaika, Kuva
-        Karttaan:  Nimi, MMSI, P/l/s, ship type, destination, nav stat.-->
 
     <!--Lisätään kartta, jossa näkyy laiva-->
     <div class="col-md-8">
@@ -33,7 +35,12 @@
         var marker = "";
         var map = "";
         var image = "";
+        var name = "";
+        var lat = parseFloat($('#latitude').html())
+        console.log(name);
+        hideShipData(name);
 
+        //Updatas ship marker position in the map
         function moveMarker() {
           var lat = parseFloat($('#latitude').html());
           var lng = parseFloat($('#longitude').html());
@@ -42,12 +49,28 @@
           map.setCenter(newLatLng);
         }
 
-        //Laskee kuinka pitkään menee, että laiva saapuu Mustolaan. Voisi käyttää jotain keskinopeutta?
+        //Estimates how long time it takes for ship to arrive in Mustola
         function calculateEta(speed, distance) {
           const eta = Math.round((distance / (speed * 1.852)) * 60)
           $('#eta').text(eta);
         }
 
+        //Hides ship data and shows noshipsdata JOS shipname = NULL niin tämä, jos ei niin showShip.
+        function hideShipData(name, speed, distance) {
+          var shipData = document.getElementById("shipData");
+          if (name) {
+            shipData.style.display = "flex"; 
+            noShips.style.display = "none"; 
+            moveMarker();
+            calculateEta(speed, distance);
+          }
+          else {
+            shipData.style.display = "none"; 
+            noShips.style.display = "flex"; 
+          }
+        }
+
+        //Initializing map
         function initMap() {
           var lat = parseFloat($('#latitude').html())
           var lng = parseFloat($('#longitude').html())
@@ -59,10 +82,11 @@
           //info window that shows extra data in when the google maps ship icon is clicked on
           infoWindow = new google.maps.InfoWindow({
             content: "<div style='float:right; padding: 10px;'>" +
-              "<p><strong>Destination: </strong><span>{{ destination }}</span></p>" +
-              "<p><strong>Speed: </strong><span>{{ speed }}</span></p>" +
-              "<p><strong>Pituus/leveys/syväys: </strong><span>{{ length }}</span><span> / </span><span>{{ width }}</span><span> / </span><span>{{ draught }}</span> m</p>"          });
-
+              "<p><strong>Määränpää: </strong><span>{{ destination }}</span></p>" +
+              "<p><strong>Nopeus: </strong><span>{{ speed }}</span></p>" +
+              "<p><strong>Pituus/leveys/syväys: </strong><span>{{ length }}</span><span> / </span><span>{{ width }}</span><span> / </span><span>{{ draught }}</span> m</p>" +
+              "<p><strong>Status: </strong><span>{{ navStat }}</span></p>"
+          });
           //custom icon
           var icon = {
             url: "https://image.flaticon.com/icons/svg/2928/2928743.svg",
@@ -80,7 +104,7 @@
           });
         }
 
-        //Päivittää laivojen tiedot 5s välein
+        //Updates ship data in 5 seconds interval
         setInterval(function () {
           $.ajax({
             type: 'POST',
@@ -93,16 +117,15 @@
               $('#width').text(data.width);
               $('#draught').text(data.draught);
               $('#flag').text(data.flag);
-              $('#shipType').text(data.ship_type);
+              $('#shipType').text(data.shipType);
               $('#distance').text(data.distance);
-              destination = data.destination;
-              speed = data.speed;
-              $('#navStat').text(data.nav_stat);
+              $('#speed').text(data.speed);
+              $('#destination').text(data.destination);
+              $('#navStat').text(data.navStat);
               $('#latitude').text(data.latitude);
               $('#longitude').text(data.longitude);
               $('#shipPhoto').attr('src', data.image);
-              moveMarker();
-              calculateEta(data.speed, data.distance);
+              hideShipData(data.name);
             });
         }, 5000);
       </script>

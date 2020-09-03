@@ -9,13 +9,12 @@ from datetime import datetime, timedelta
 from math import sin, cos, sqrt, atan2, radians
 from bs4 import BeautifulSoup
 from pymongo import MongoClient
-from dotenv import load_dotenv
 
-#TODO Muuta Suomen kielelle myös laivojen tyypit
-#TODO Paranna ulkonäköä 
 #TODO Hommaa laivoille uusi marker, joka kääntyy suunnan mukaan.
+#TODO Paranna sivuston ulkonäköä 
+#TODO Muuta Suomen kielelle myös laivojen tyypit
 #TODO JS erilliseen tiedostoon
-#TODO eta aikaan sulkujen aika korjaukset ja arvio kun sulussa vauhti putoaa 0. Tällöin tulee sulussa?
+#TODO jos laivaaa ei ole sulussa niin muuttuja isShip?? Tämän mukaan sitten poistaa kaikki nettisivulta. 
 
 def iso_time():
     current_time = (datetime.utcnow()- timedelta(hours = 0.005)).isoformat().replace(":", "%3A")
@@ -185,9 +184,8 @@ def fetch_ships():
 
     #Sets api_call parameters
     home_coordinates = [61.058983,28.320951]
-    radius = 60
+    radius = 50
     current_time = iso_time()
-
 
     #Tähän Try Except ja laivoja ei löydy. 
 
@@ -221,8 +219,8 @@ def fetch_ships():
     ship_type = get_ship_type (ship_type_number)
 
     #Open connection to mongoDB 
-    client = MongoClient('mongodb+srv://dbUser:3NSPv8pakvWLUne@mustola.g1flp.mongodb.net/ships?retryWrites=true&w=majority')
-    
+    client = MongoClient("mongodb+srv://dbUser:3NSPv8pakvWLUne@mustola.g1flp.mongodb.net/ships?retryWrites=true&w=majority")
+
     db = client.ships
     shipData = db.shipDetails
     #Checks if ship data is found in DB
@@ -251,18 +249,19 @@ def analysator():
         try:
             name, mmsi, distance, destination, speed, width, length, flag, image, nav_stat, ship_type, draught, latitude, longitude = fetch_ships()
             return jsonify({'name':name, 'mmsi':mmsi, 'distance':distance, 'destination':destination, 'speed':speed, 'width':width, 'length':length, 
-            'flag':flag, 'image':image, 'nav_stat':nav_stat, 'ship_type':ship_type, 'draught':draught, 'latitude':latitude, 'longitude':longitude})
+            'flag':flag, 'image':image, 'navStat':nav_stat, 'shipType':ship_type, 'draught':draught, 'latitude':latitude, 'longitude':longitude})
             
         except: 
-            teksti = ("Laivaa ei saatu haettua")
-            return jsonify({'name' : teksti})
-         
-    name, mmsi, distance, destination, speed, width, length, flag, image, nav_stat, ship_type, draught, latitude, longitude = fetch_ships()
-    cords=[latitude,longitude]
-    
-    return render_template("public/home.html", name=name, mmsi=mmsi, distance=distance, destination=destination, speed=speed, width=width, length=length, 
-    flag=flag, image=image, nav_stat=nav_stat, ship_type=ship_type, draught=draught, cords=cords, latitude=latitude, longitude=longitude)
-
+             return jsonify({'name':"", 'mmsi':"", 'distance':"", 'destination':"", 'speed':"", 'width':"", 'length':"", 
+            'flag':"", 'image':"", 'navStat':"", 'shipType':"", 'draught':"", 'latitude':"", 'longitude':""})
+            
+    try:
+        name, mmsi, distance, destination, speed, width, length, flag, image, nav_stat, ship_type, draught, latitude, longitude = fetch_ships()
+        return render_template("public/home.html", name=name, mmsi=mmsi, distance=distance, destination=destination, speed=speed, width=width, length=length, 
+        flag=flag, image=image, navStat=nav_stat, shipType=ship_type, draught=draught, latitude=latitude, longitude=longitude)
+    except:
+        return render_template("public/home.html", name="", mmsi="", distance="", destination="", speed="", width="", length="", 
+        flag="", image="", navStat="", shipType="", draught="", latitude="", longitude="")
 
 @app.route("/tietoa")
 def about():

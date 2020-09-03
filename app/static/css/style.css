@@ -62,3 +62,7 @@ width: 100%;
     padding: 5px;
     width: 350px;
 }
+
+#noShips {
+ display: none;
+}
