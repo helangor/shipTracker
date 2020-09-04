@@ -10,11 +10,12 @@ from math import sin, cos, sqrt, atan2, radians
 from bs4 import BeautifulSoup
 from pymongo import MongoClient
 
-#TODO Hommaa laivoille uusi marker, joka kääntyy suunnan mukaan.
+#TODO Pythoni kääntämään aina markeria. Tähän inputtina laivan tyyppi ja course. Tallentaa sen aina ship.svg fileen.
+#TODO jos laivaa ei ensin näkyvissä niin ennen ekaa refreshiä ruma sivu.
 #TODO Paranna sivuston ulkonäköä 
-#TODO Muuta Suomen kielelle myös laivojen tyypit
 #TODO JS erilliseen tiedostoon
-#TODO jos laivaaa ei ole sulussa niin muuttuja isShip?? Tämän mukaan sitten poistaa kaikki nettisivulta. 
+#TODO Destination ei toimi
+#TODO laivojen tyypin mukaan eri ikonit. Esim. matkustaja vs. rahtilaiva
 
 def iso_time():
     current_time = (datetime.utcnow()- timedelta(hours = 0.005)).isoformat().replace(":", "%3A")
@@ -37,47 +38,43 @@ def calculate_distance(lat1,lon1,lat2,lon2):
 
 def get_ship_type(ship_type_number):
     if 20 < ship_type_number <= 29:
-        ship_type = "Wing in ground (WIG)"
+        ship_type = "Patosiipialus (WIG)"
     elif (31 <= ship_type_number <= 32):
-        ship_type = "Tug (towing)"
+        ship_type = "Hinaaja (hinaus käynnissä)"
     elif ship_type_number == 33:
-        ship_type = "Dredging, underwater operations"
+        ship_type = "Ruoppaus/vedenalainen toiminta"
     elif ship_type_number == 34:
-        ship_type = "Diving operations"
+        ship_type = "Sukellustoiminta"
     elif ship_type_number == 35:
-        ship_type = "Military"
+        ship_type = "Sota-alus"
     elif ship_type_number == 36:
-        ship_type = "Sailing"
+        ship_type = "Purjealus"
     elif ship_type_number == 37:
-        ship_type = "Pleasure craft"               
+        ship_type = "Huvialus"               
     elif 40 <= ship_type_number <= 49:
-        ship_type = "High speed craft (HSC)"
+        ship_type = "Pika-alus (HSC)"
     elif ship_type_number == 50:
-        ship_type = "Pilot"    
+        ship_type = "Luotsi"    
     elif ship_type_number == 51:
-        ship_type = "Search and rescue"    
+        ship_type = "Pelastusalus"    
     elif ship_type_number == 52:
-        ship_type = "Tug"        
-    elif ship_type_number == 53:
-        ship_type = "Port tender"        
-    elif ship_type_number == 54:
-        ship_type = "Anti pollution"        
+        ship_type = "Hinaaja"                     
     elif ship_type_number == 55:
-        ship_type = "Law enforcement"               
+        ship_type = "Viranomainen"               
     elif 60 <= ship_type_number <= 69:
-        ship_type = "Passenger"               
+        ship_type = "Matkustajalaiva"               
     elif 70 <= ship_type_number <= 79:
-        ship_type = "Cargo"               
+        ship_type = "Rahtialus"               
     elif 80 <= ship_type_number <= 89:
-        ship_type = "Tanker"
+        ship_type = "Tankkeri"
     else:
-        ship_type = "Other or unknown type"
+        ship_type = "Muu alus"
     return ship_type
 
 #Returns navigation status in text
 def get_nav_status(nav_stat_number):
-    nav_statuses ={0:"Under way using engine", 1:"At anchor", 2:"Not under command", 3:"Restricted manoeuverability", 
-    4:"Constrained by her draught", 5:"Moored", 6:"Aground", 7:"Engaged in Fishing", 8:"Under way sailing"} 
+    nav_statuses ={0:"Kulkee moottorilla", 1:"Ankkurissa", 2:"Ohjauskyvytön", 3:"Rajoitettu ohjattavuus", 
+    4:"Pohjasta kiinni", 5:"Kiinnitettynä", 6:"Karilla", 7:"Harjoittaa kalastusta", 8:"Kulkee purjeilla"} 
 
     try: 
         nav_stat = nav_statuses[nav_stat_number]
@@ -97,11 +94,9 @@ def get_ship_data(mmsi, imo):
             link = links.find('a', href=True)
             ship_link = link.get('href')
         site = "https://www.vesseltracker.com" + ship_link
-        print(site)
     #If IMO exists use that
     else:
         site = "https://vesseltracker.com/en/Ships/" + str(imo) + ".html"
-        #print(site)
         
     response = requests.get(site)
     soup = BeautifulSoup(response.content, 'html.parser')
@@ -133,10 +128,10 @@ def get_ship_data(mmsi, imo):
     return mmsi, flag, width, length, ship_photo_url
 
 #Saves scraped ship data to DB
-def save_ship_to_DB(shipData, mmsi,imo, name, ship_type, draught):
+def save_ship_to_DB(shipData, mmsi,imo, shipName, ship_type, draught):
     mmsi, flag, width, length, image = get_ship_data(mmsi, imo)                            
     shipDataDocument = {
-    "name": name,
+    "shipName": shipName,
     "mmsi": mmsi,
     "imo": imo,
     "shipType":ship_type,
@@ -147,7 +142,7 @@ def save_ship_to_DB(shipData, mmsi,imo, name, ship_type, draught):
     "image":image
     }
     shipData.insert_one(shipDataDocument)  
-    print("Inserted:", name, "to DB")
+    print("Inserted:", shipName, "to DB")
 
 #Finds the closest ship that is coming towards to Mustola
 def get_closest_ship(location_data, radius, homeLat, homeLong):
@@ -161,10 +156,12 @@ def get_closest_ship(location_data, radius, homeLat, homeLong):
         course = p['properties']['cog']     
         long = p['geometry']['coordinates'][0]
         lat = p['geometry']['coordinates'][1]
+        speed = int(p['properties']['sog']) #Poista tämä, nyt vain testinä tässä ja iffissä
 
         """Only ships that are coming towards and are moving, Ship status has to be something else than anchored
         Ship needs to be in the channel and not in lake Saimaa. Ship is coming towards to Mustola channel"""
-        if nav_stat not in (1,5) and (lat < 61.0804652 and long > 28.2754649) and (((200 < course < 360) and lat < homeLat and long > homeLong) or ((30 < course < 180) and lat > homeLat and long < homeLong)):
+        #if nav_stat not in (1,5) and (lat < 61.0804652 and long > 28.2754649) and (((200 < course < 360) and lat < homeLat and long > homeLong) or ((30 < course < 180) and lat > homeLat and long < homeLong)):
+        if (speed > 1) and nav_stat not in (1,5):
 
             #Calculating distance       
             longitude = p['geometry']['coordinates'][0]
@@ -174,7 +171,6 @@ def get_closest_ship(location_data, radius, homeLat, homeLong):
             if distance < shortest_distance:
                 shortest_distance = distance
                 closest_ship = p
-            #Tähän tsekki, että otetaan vain lähin laiva    
         else:
             pass   
     return closest_ship 
@@ -187,8 +183,6 @@ def fetch_ships():
     radius = 50
     current_time = iso_time()
 
-    #Tähän Try Except ja laivoja ei löydy. 
-
     api_call = "https://meri.digitraffic.fi/api/v1/locations/latitude/" + str(home_coordinates[0]) +"/longitude/" + str(home_coordinates[1]) + "/radius/" + str(radius) + "/from/" + current_time
     response = requests.get(api_call)
     location_data = (response.json())
@@ -197,7 +191,6 @@ def fetch_ships():
     #Kun lähin laiva tiedossa niin valitaan sen tiedot. Jos JSON empty niin return 0
     speed = ship['properties']['sog']
     mmsi = ship['mmsi']
-    heading = ship['properties']['heading']
     course = ship['properties']['cog']
     longitude = ship['geometry']['coordinates'][0]
     latitude = ship['geometry']['coordinates'][1]
@@ -209,10 +202,13 @@ def fetch_ships():
 
     #Getting more specific shipdata from API
     vessel_details_api_call = "https://meri.digitraffic.fi/api/v1/metadata/vessels/" + str(mmsi)
+    print(vessel_details_api_call)
     response = requests.get(vessel_details_api_call)
     details = (response.json())
     destination = details['destination']
-    name = details['name']
+    if destination == "":
+        destination = "Ei tiedossa"
+    shipName = details['name']
     draught = details['draught'] / 10 #Number divided by 10 to get real draught
     imo = details['imo']
     ship_type_number = details['shipType']
@@ -229,7 +225,7 @@ def fetch_ships():
         pass
     #If ship details not in DB will fetch and save it to DB
     else:
-        save_ship_to_DB(shipData, mmsi, imo, name, ship_type, draught)
+        save_ship_to_DB(shipData, mmsi, imo, shipName, ship_type, draught)
     
     #Haetaan DB:stä aikaisemmin sinne raavitut tiedot
     cursor = shipData.find_one( {'mmsi': mmsi })
@@ -239,7 +235,7 @@ def fetch_ships():
     image = cursor['image']
 
     #Palauteteaan tiedot
-    return (name, mmsi, distance, destination, speed, width, length, flag, image, nav_stat, ship_type, draught, latitude, longitude)
+    return (shipName, mmsi, course, distance, destination, speed, width, length, flag, image, nav_stat, ship_type, draught, latitude, longitude)
 
 
 @app.route("/", methods=["GET", "POST"])
@@ -247,21 +243,18 @@ def analysator():
     if request.method == "POST":
         
         try:
-            name, mmsi, distance, destination, speed, width, length, flag, image, nav_stat, ship_type, draught, latitude, longitude = fetch_ships()
-            return jsonify({'name':name, 'mmsi':mmsi, 'distance':distance, 'destination':destination, 'speed':speed, 'width':width, 'length':length, 
-            'flag':flag, 'image':image, 'navStat':nav_stat, 'shipType':ship_type, 'draught':draught, 'latitude':latitude, 'longitude':longitude})
-            
+            shipName, mmsi, course, distance, destination, speed, width, length, flag, image, nav_stat, ship_type, draught, latitude, longitude = fetch_ships()
+            return jsonify({'shipName':shipName, 'course':course, 'mmsi':mmsi, 'distance':distance, 'destination':destination, 'speed':speed, 'width':width, 'length':length, 
+            'flag':flag, 'image':image, 'navStat':nav_stat, 'shipType':ship_type, 'draught':draught, 'latitude':latitude, 'longitude':longitude})  
         except: 
-             return jsonify({'name':"", 'mmsi':"", 'distance':"", 'destination':"", 'speed':"", 'width':"", 'length':"", 
-            'flag':"", 'image':"", 'navStat':"", 'shipType':"", 'draught':"", 'latitude':"", 'longitude':""})
-            
+             return jsonify({'shipName':""})
+        
     try:
-        name, mmsi, distance, destination, speed, width, length, flag, image, nav_stat, ship_type, draught, latitude, longitude = fetch_ships()
-        return render_template("public/home.html", name=name, mmsi=mmsi, distance=distance, destination=destination, speed=speed, width=width, length=length, 
+        shipName, mmsi, course, distance, destination, speed, width, length, flag, image, nav_stat, ship_type, draught, latitude, longitude = fetch_ships()
+        return render_template("public/home.html", shipName=shipName, course=course, mmsi=mmsi, distance=distance, destination=destination, speed=speed, width=width, length=length, 
         flag=flag, image=image, navStat=nav_stat, shipType=ship_type, draught=draught, latitude=latitude, longitude=longitude)
     except:
-        return render_template("public/home.html", name="", mmsi="", distance="", destination="", speed="", width="", length="", 
-        flag="", image="", navStat="", shipType="", draught="", latitude="", longitude="")
+        return render_template("public/home.html", shipName="")
 
 @app.route("/tietoa")
 def about():
