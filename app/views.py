@@ -11,9 +11,10 @@ from bs4 import BeautifulSoup
 from pymongo import MongoClient
 
 #TODO Paranna sivuston ulkonäköä
-#TODO JS erilliseen tiedostoon
+#TODO mobile versiossa taustakuva rumasti.
 #TODO infoboxi ei aina päivity ja jää tyhjäksi
 #TODO järkkää css file järkevämmäksi
+#TODO JS erilliseen tiedostoon
 
 def iso_time():
     current_time = (datetime.utcnow()- timedelta(hours = 0.005)).isoformat().replace(":", "%3A")

@@ -2,8 +2,8 @@ body {
   font-family: 'Open Sans', sans-serif;
   background-color:lightgray;
   background-image: url('https://images.pexels.com/photos/33689/ship-boat-lake-garda-italy.jpg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940');
+  background-size: auto;
   background-repeat: no-repeat;
-  background-size: cover;
 }
 
 .footer-padding {
