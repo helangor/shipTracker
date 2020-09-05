@@ -3,7 +3,7 @@ body {
   background-color:lightgray;
   background-image: url('https://images.pexels.com/photos/33689/ship-boat-lake-garda-italy.jpg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940');
   background-repeat: no-repeat;
-  background-size: auto;
+  background-size: cover;
 }
 
 .footer-padding {
