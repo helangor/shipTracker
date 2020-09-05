@@ -28,6 +28,12 @@
     <p hidden id=longitude>{{ longitude }}</p>
     <p hidden id=speed>{{ speed }}</p>
     <p hidden id=distance>{{ distance }}</p>
+    <p hidden id=mmsi>{{ mmsi }}</p>
+    <p hidden id=destination>{{ destination }}</p>
+    <p hidden id=navStat>{{ navStat }}</p>
+    <p hidden id=length>{{ length }}</p>
+    <p hidden id=width>{{ width }}</p>
+    <p hidden id=draught>{{ draught }}</p>
   </div>
 
   <!--Lisätään kartta, jossa näkyy laiva-->
@@ -105,6 +111,15 @@
       $('#eta').text(eta);
     }
 
+    function updateInfoWindowContent() {
+      infoWindow.setContent("<div style='float:right; padding: 10px;'>" +
+          "<p><strong>MMSI: </strong><span>" + $('#mmsi').text() + "</span></p>" +
+          "<p><strong>Määränpää: </strong><span>"+ $('#destination').text() + "</span></p>" +
+          "<p><strong>Nopeus: </strong><span>"+ $('#speed').text() + "</span> solmua</p>" +
+          "<p><strong>Pituus/leveys/syväys: </strong><span>"+ $('#length').text() + "</span><span> / </span><span>"+ $('#width').text() + "</span><span> / </span><span>"+ $('#draught').text() + "</span> m</p>" +
+          "<p><strong>Status: </strong><span>"+ $('#navStat').text() + "</span></p>");
+    }
+
     //Hides ship data and shows noshipsdata JOS shipname = NULL niin tämä, jos ei niin showShip.
     function hideShipData() {
       var shipName = $('#shipName').text()
@@ -114,6 +129,7 @@
         loadingScreen.style.display = "none";
         calculateEta();
         moveMarker();
+        updateInfoWindowContent();
       }
       else {
         shipData.style.display = "none";
