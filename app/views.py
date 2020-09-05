@@ -13,6 +13,7 @@ from pymongo import MongoClient
 #TODO Paranna sivuston ulkonäköä
 #TODO JS erilliseen tiedostoon
 #TODO infoboxi ei aina päivity ja jää tyhjäksi
+#TODO järkkää css file järkevämmäksi
 
 def iso_time():
     current_time = (datetime.utcnow()- timedelta(hours = 0.005)).isoformat().replace(":", "%3A")
@@ -153,7 +154,6 @@ def get_closest_ship(location_data, radius, homeLat, homeLong):
         course = p['properties']['cog']     
         long = p['geometry']['coordinates'][0]
         lat = p['geometry']['coordinates'][1]
-        speed = int(p['properties']['sog']) #Poista tämä, nyt vain testinä tässä ja iffissä
 
         """Only ships that are coming towards and are moving, Ship status has to be something else than anchored
         Ship needs to be in the channel and not in lake Saimaa. Ship is coming towards to Mustola channel"""

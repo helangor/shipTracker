@@ -1,3 +1,10 @@
+body {
+  font-family: 'Open Sans', sans-serif;
+  background-color:lightgray;
+  background-image: url('https://images.pexels.com/photos/33689/ship-boat-lake-garda-italy.jpg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940');
+  background-repeat: no-repeat;
+  background-size: auto;
+}
 
 .footer-padding {
 padding-bottom: 60px;
@@ -17,9 +24,19 @@ font-size: 12px;
 color: #fff;
 }
 
+.shipInfo {
+  background-color:rgba(255,255,255,0.4);
+  padding: 15px;
+}
+
+.aboutPage {
+  padding: 15px;
+}
+
 #shipData{
 text-align: center;
 display: none;
+margin: 20px;
 }
 
 h1{
@@ -28,13 +45,13 @@ padding: 20px 0 20px 0;
 }
 
 #map {
-height: 500px;
+height: 600px;
 width: 100%;
 }
 
 #shipPhoto {
   padding: 5px;
-  width: 350px;
+  width: 100%;
 }
 
 #noShips {
