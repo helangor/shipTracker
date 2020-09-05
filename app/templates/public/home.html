@@ -6,12 +6,12 @@
 
 <!--Loading screen-->
 <div id="loadingScreen">
-  <h1>Ladataan</h1>
+  <h1>Ladataan laivoja</h1>
 </div>
 
 <!--Div which shows when no ships are coming towards to Mustola-->
 <div id="noShips">
-  <h1>Ei laivoja lähistöllä</h1>
+  <h1>Kanavassa ei Mustolaa kohti tulevia laivoja tällä hetkellä</h1>
 </div>
 
 <!--Div which shows when ships are coming towards to Mustola-->
@@ -80,7 +80,8 @@
         marker = new google.maps.Marker({
           position: new google.maps.LatLng(lat, lng),
           map: map,
-          icon: icon
+          icon: icon,
+          anchor: new google.maps.Point(25,25)
         });
         marker.addListener("click", () => {
           infoWindow.open(map, marker);

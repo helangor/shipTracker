@@ -11,9 +11,8 @@ from bs4 import BeautifulSoup
 from pymongo import MongoClient
 
 #TODO Paranna sivuston ulkonäköä
-#TODO Laiva markerin ankkurointipisteen muuttaminen. Nyt välillä maalla.
 #TODO JS erilliseen tiedostoon
-#TODO lisää viittaukset flaticoniin
+#TODO infoboxi ei aina päivity ja jää tyhjäksi
 
 def iso_time():
     current_time = (datetime.utcnow()- timedelta(hours = 0.005)).isoformat().replace(":", "%3A")
@@ -158,8 +157,8 @@ def get_closest_ship(location_data, radius, homeLat, homeLong):
 
         """Only ships that are coming towards and are moving, Ship status has to be something else than anchored
         Ship needs to be in the channel and not in lake Saimaa. Ship is coming towards to Mustola channel"""
-        #if nav_stat not in (1,5) and (lat < 61.0804652 and long > 28.2754649) and (((200 < course < 360) and lat < homeLat and long > homeLong) or ((30 < course < 180) and lat > homeLat and long < homeLong)):
-        if nav_stat not in (1,5):
+        if nav_stat not in (1,5) and (lat < 61.0804652 and long > 28.2754649) and (((200 < course < 360) and lat < homeLat and long > homeLong) or ((30 < course < 180) and lat > homeLat and long < homeLong)):
+        #if nav_stat not in (1,5):
 
             #Calculating distance       
             longitude = p['geometry']['coordinates'][0]
@@ -178,7 +177,7 @@ def fetch_ships():
 
     #Sets api_call parameters
     home_coordinates = [61.058983,28.320951]
-    radius = 3
+    radius = 40
     current_time = iso_time()
 
     api_call = "https://meri.digitraffic.fi/api/v1/locations/latitude/" + str(home_coordinates[0]) +"/longitude/" + str(home_coordinates[1]) + "/radius/" + str(radius) + "/from/" + current_time
