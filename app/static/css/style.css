@@ -19,7 +19,7 @@ color: #fff;
 
 #shipData{
 text-align: center;
-display: flex;
+display: none;
 }
 
 h1{

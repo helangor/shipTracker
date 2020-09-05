@@ -4,6 +4,11 @@
 
 {% block main %}
 
+<!--Loading screen-->
+<div id="loadingScreen">
+  <h1>Ladataan</h1>
+</div>
+
 <!--Div which shows when no ships are coming towards to Mustola-->
 <div id="noShips">
   <h1>Ei laivoja lähistöllä</h1>
@@ -18,8 +23,9 @@
       <p><strong>Maa: </strong><span id="flag">{{ flag }}</span></p>
       <p><strong>Etäisyys Mustolasta: </strong><span id="distance">{{ distance }}</span> <span>km</span> </p>
       <p><strong>ETA: </strong><span id="eta">--</span> minuuttia</p>
-      <p><strong>Suunta: </strong><span id="course">{{ course }}</span></p>
-      <img id=shipPhoto src={{ image }} alt="Ship photo">
+      <img id=shipPhoto
+        src={{ image or 'https://www.pinclipart.com/picdir/big/1-17227_cruise-ship-images-free-download-clip-art-carnival.png' }}
+        alt="Ship photo">
       <p hidden id=latitude>{{ latitude }}</p>
       <p hidden id=longitude>{{ longitude }}</p>
       <p hidden id=speed>{{ speed }}</p>
@@ -33,10 +39,23 @@
       src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC7RqiI1IT985csNB4X2AfHSytWHacYy7c&callback=initMap"></script>
 
     <script>
+      var marker;
+      var map;
+      var image;
+      var lat;
+      var lng;
+      var speed = $('#speed').text()
+      var distance = $('#distance').text()
+
+
       //Initializing map
       function initMap() {
-        var lat = parseFloat($('#latitude').html())
-        var lng = parseFloat($('#longitude').html())
+        lat = parseFloat($('#latitude').html())
+        lng = parseFloat($('#longitude').html())
+        if (isNaN(lat)) {
+          lat = 0;
+          lng = 0;
+        }
         var ship = { lat: lat, lng: lng }; // The location of ship
         map = new google.maps.Map(document.getElementById('map'), { zoom: 14, center: ship });
 
@@ -47,13 +66,13 @@
           content: "<div style='float:right; padding: 10px;'>" +
             "<p><strong>MMSI: </strong><span>{{ mmsi }}</span></p>" +
             "<p><strong>Määränpää: </strong><span>{{ destination }}</span></p>" +
-            "<p><strong>Nopeus: </strong><span>{{ speed }}</span></p>" +
+            "<p><strong>Nopeus: </strong><span>{{ speed }}</span> solmua</p>" +
             "<p><strong>Pituus/leveys/syväys: </strong><span>{{ length }}</span><span> / </span><span>{{ width }}</span><span> / </span><span>{{ draught }}</span> m</p>" +
             "<p><strong>Status: </strong><span>{{ navStat }}</span></p>"
         });
         //custom icon
         var icon = {
-          url: "{{ url_for('static', filename='img/favicon.ico') }}",
+          url: "https://image.flaticon.com/icons/svg/3455/3455497.svg",
           scaledSize: new google.maps.Size(50, 50), // scaled size
         };
 
@@ -68,21 +87,21 @@
         });
       }
 
-      var marker;
-      var map;
-      var image;
-      var shipName = $('#shipName').text()
-      var speed = $('#speed').text()
-      var distance = $('#distance').text()
-      calculateEta(speed, distance);
-
       //Updates ship marker position in the map
       function moveMarker() {
-        var lat = parseFloat($('#latitude').html());
-        var lng = parseFloat($('#longitude').html());
+        lat = parseFloat($('#latitude').html());
+        lng = parseFloat($('#longitude').html());
         var newLatLng = new google.maps.LatLng(lat, lng);
         marker.setPosition(newLatLng);
         map.setCenter(newLatLng);
+      }
+
+      //Estimates how long time it takes for ship to arrive in Mustola
+      function calculateEta() {
+        speed = $('#speed').text()
+        distance = $('#distance').text()
+        const eta = Math.round((distance / (speed * 1.852)) * 60)
+        $('#eta').text(eta);
       }
 
       //Hides ship data and shows noshipsdata JOS shipname = NULL niin tämä, jos ei niin showShip.
@@ -91,28 +110,18 @@
         if (shipName) {
           shipData.style.display = "flex";
           noShips.style.display = "none";
+          loadingScreen.style.display = "none";
+          calculateEta();
+          moveMarker();
         }
         else {
           shipData.style.display = "none";
           noShips.style.display = "flex";
+          loadingScreen.style.display = "none";
         }
       }
 
-      function setMarkerIcon() {
-        var icon = {
-          url: "{{ url_for('static', filename='img/favicon.ico') }}",
-          scaledSize: new google.maps.Size(50, 50) // scaled size
-        };
-        marker.setIcon(icon);
-      }
-
-      //Estimates how long time it takes for ship to arrive in Mustola
-      function calculateEta(speed, distance) {
-        const eta = Math.round((distance / (speed * 1.852)) * 60)
-        $('#eta').text(eta);
-      }
-
-      //Updates ship data in 5 seconds interval
+      //Updates ship data in x seconds interval
       setInterval(function () {
         $.ajax({
           type: 'POST',
@@ -135,8 +144,6 @@
             $('#longitude').text(data.longitude);
             $('#shipPhoto').attr('src', data.image);
             hideShipData();
-            moveMarker();
-            setMarkerIcon();
           });
       }, 5000);
 
