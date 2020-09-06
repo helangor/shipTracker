@@ -12,15 +12,28 @@
 <!--Div which shows when no ships are coming towards to Mustola-->
 <div class="container" id="noShips">
   <h1>Mustolaa kohti tulevia laivoja ei ole tällä hetkellä kanavassa</h1>
-  <p>Lisää tietoa laivatutkasta<a class="aboutPageButton" href="#"><strong> täältä</strong></a></p>
+  <p>Sivusto päivittää laivan tiedot automaattisesti tähän, kun laivoja havaitaan.</p>
+  <p>Lisää tietoa laivatutkasta <a class="aboutPageButton" href="#"><strong>täällä</strong></a></p>
 </div>
 
 <!--About page-->
 <div class="container" id="aboutPage">
   <h4>Laivatutka</h4>
   <p>Mustolan sulkuun saapuvia laivoja seuraava tutka</p>
-  <p>Mitä tämä tekee ja Millaiset laivat otetaan mukaan?</p>
-  <p>AIS mikä sen on mihin perustuu, mistä data saadaan?</p>
+  <p>Sivusto päivittyy automaattisesti</p>
+  <p>Kriteereitä laivoille:</p>
+  <ul>
+    <li>Laiva on Saimaan kanavan alueella</li>
+    <li>Laiva on tulossa kohti Mustolan sulkua</li>
+    <li>Laivan status ei ole "Ankkurissa" tai "Kiinnitettynä"</li>
+  </ul>
+  <p>Tutka näyttää aina Mustolaa lähinnä olevan laivan.</p>
+  <hr>
+
+  <h4>Mistä tiedot tulevat?</h4>
+  <p>Laivoissa käytetään <a href="https://fi.wikipedia.org/wiki/AIS-j%C3%A4rjestelm%C3%A4">AIS-järjestelmää</a>, joka lähettää tietoa mm. laivan sijainnista. </p>
+  <p>Nämä sijaintitiedot saadaan <a href="https://www.digitraffic.fi/">Digitrafficin</a> avoimen datan rajapinnan kautta.</p>
+  <p>Lisäksi joitakin lisätietoja mm. laivan kuva, saadaan ulkopuoliselta sivustolta.</p>
   <hr>
 
   <h4>Käytetyt teknologiat</h4>
