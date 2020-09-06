@@ -10,9 +10,12 @@ from math import sin, cos, sqrt, atan2, radians
 from bs4 import BeautifulSoup
 from pymongo import MongoClient
 
-#TODO Paranna sivuston ulkonäköä
+#TODO Ei laivoja sivu nätimmäksi
+#TODO About sivulle tarkemmin, millä kriteereillä laivat otetaan. 
 #TODO järkkää css file järkevämmäksi
 #TODO JS erilliseen tiedostoon
+#TODO suurenna hieman aluetta mistä ottaa laivat mustolan ympärillä. 
+#TODO Muuta aboutPage spa tyyliin
 
 def iso_time():
     current_time = (datetime.utcnow()- timedelta(hours = 0.005)).isoformat().replace(":", "%3A")
