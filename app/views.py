@@ -12,10 +12,10 @@ from pymongo import MongoClient
 
 #TODO Ei laivoja sivu nätimmäksi
 #TODO About sivulle tarkemmin, millä kriteereillä laivat otetaan. 
-#TODO järkkää css file järkevämmäksi
-#TODO JS erilliseen tiedostoon
 #TODO suurenna hieman aluetta mistä ottaa laivat mustolan ympärillä. 
-#TODO Muuta aboutPage spa tyyliin
+#TODO Tee ladataan laivoja juttuun joku laiva animaatio
+#TODO Lisää AboutPage blockiksi.
+#TODO JS erilliseen tiedostoon
 
 def iso_time():
     current_time = (datetime.utcnow()- timedelta(hours = 0.005)).isoformat().replace(":", "%3A")
@@ -183,6 +183,7 @@ def fetch_ships():
     current_time = iso_time()
 
     api_call = "https://meri.digitraffic.fi/api/v1/locations/latitude/" + str(home_coordinates[0]) +"/longitude/" + str(home_coordinates[1]) + "/radius/" + str(radius) + "/from/" + current_time
+    print(api_call)
     response = requests.get(api_call)
     location_data = (response.json())
     ship = get_closest_ship(location_data, radius, home_coordinates[0], home_coordinates[1])
@@ -201,6 +202,7 @@ def fetch_ships():
 
     #Getting more specific shipdata from API
     vessel_details_api_call = "https://meri.digitraffic.fi/api/v1/metadata/vessels/" + str(mmsi)
+    print(vessel_details_api_call)
     response = requests.get(vessel_details_api_call)
     details = (response.json())
     destination = details['destination']

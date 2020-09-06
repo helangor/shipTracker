@@ -13,9 +13,9 @@
 <div class="container" id="noShips">
   <h1>Mustolaa kohti tulevia laivoja ei ole tällä hetkellä kanavassa</h1>
   <p>Lue lisää täältä</p>
-  <hr>
 </div>
 
+<!--About page-->
 <div class="container" id="aboutPage">
   <h4>Laivatutka</h4>
   <p>Mustolan sulkuun saapuvia laivoja seuraava tutka</p>
@@ -60,125 +60,135 @@
   </div>
 </div>
 
-  <script>
-    var marker;
-    var map;
-    var image;
-    var lat;
-    var lng;
-    var speed = $('#speed').text()
-    var distance = $('#distance').text()
+<script>
+  var marker;
+  var map;
+  var image;
+  var lat;
+  var lng;
+  var speed = $('#speed').text()
+  var distance = $('#distance').text()
 
 
-    //Initializing map
-    function initMap() {
-      lat = parseFloat($('#latitude').html())
-      lng = parseFloat($('#longitude').html())
-      if (isNaN(lat)) {
-        lat = 0;
-        lng = 0;
-      }
-      var ship = { lat: lat, lng: lng }; // The location of ship
-      map = new google.maps.Map(document.getElementById('map'), { zoom: 14, center: ship });
+  //Initializing map
+  function initMap() {
+    lat = parseFloat($('#latitude').html())
+    lng = parseFloat($('#longitude').html())
+    if (isNaN(lat)) {
+      lat = 0;
+      lng = 0;
+    }
+    var ship = { lat: lat, lng: lng }; // The location of ship
+    map = new google.maps.Map(document.getElementById('map'), { zoom: 14, center: ship });
 
-      image = $('#shipPhoto').attr('src');
+    image = $('#shipPhoto').attr('src');
 
-      //info window that shows extra data in when the google maps ship icon is clicked on
-      infoWindow = new google.maps.InfoWindow({
-        content: "<div style='float:right; padding: 10px;'>" +
-          "<p><strong>MMSI: </strong><span>{{ mmsi }}</span></p>" +
-          "<p><strong>Määränpää: </strong><span>{{ destination }}</span></p>" +
-          "<p><strong>Nopeus: </strong><span>{{ speed }}</span> solmua</p>" +
-          "<p><strong>Pituus/leveys/syväys: </strong><span>{{ length }}</span><span> / </span><span>{{ width }}</span><span> / </span><span>{{ draught }}</span> m</p>" +
-          "<p><strong>Status: </strong><span>{{ navStat }}</span></p>"
+    //info window that shows extra data in when the google maps ship icon is clicked on
+    infoWindow = new google.maps.InfoWindow({
+      content: "<div style='float:right; padding: 10px;'>" +
+        "<p><strong>MMSI: </strong><span>{{ mmsi }}</span></p>" +
+        "<p><strong>Määränpää: </strong><span>{{ destination }}</span></p>" +
+        "<p><strong>Nopeus: </strong><span>{{ speed }}</span> solmua</p>" +
+        "<p><strong>Pituus/leveys/syväys: </strong><span>{{ length }}</span><span> / </span><span>{{ width }}</span><span> / </span><span>{{ draught }}</span> m</p>" +
+        "<p><strong>Status: </strong><span>{{ navStat }}</span></p>"
+    });
+    //custom icon
+    var icon = {
+      url: "https://image.flaticon.com/icons/svg/3455/3455497.svg",
+      scaledSize: new google.maps.Size(50, 50), // scaled size
+    };
+
+    // The marker, positioned at ship
+    marker = new google.maps.Marker({
+      position: new google.maps.LatLng(lat, lng),
+      map: map,
+      icon: icon,
+      anchor: new google.maps.Point(25, 25)
+    });
+    marker.addListener("click", () => {
+      infoWindow.open(map, marker);
+    });
+  }
+
+  //Updates ship marker position in the map
+  function moveMarker() {
+    lat = parseFloat($('#latitude').html());
+    lng = parseFloat($('#longitude').html());
+    var newLatLng = new google.maps.LatLng(lat, lng);
+    marker.setPosition(newLatLng);
+    map.setCenter(newLatLng);
+  }
+
+  //Estimates how long time it takes for ship to arrive in Mustola
+  function calculateEta() {
+    speed = $('#speed').text()
+    distance = $('#distance').text()
+    const eta = Math.round((distance / (speed * 1.852)) * 60)
+    $('#eta').text(eta);
+  }
+
+  function updateInfoWindowContent() {
+    infoWindow.setContent("<div style='float:right; padding: 10px;'>" +
+      "<p><strong>MMSI: </strong><span>" + $('#mmsi').text() + "</span></p>" +
+      "<p><strong>Määränpää: </strong><span>" + $('#destination').text() + "</span></p>" +
+      "<p><strong>Nopeus: </strong><span>" + $('#speed').text() + "</span> solmua</p>" +
+      "<p><strong>Pituus/leveys/syväys: </strong><span>" + $('#length').text() + "</span><span> / </span><span>" + $('#width').text() + "</span><span> / </span><span>" + $('#draught').text() + "</span> m</p>" +
+      "<p><strong>Status: </strong><span>" + $('#navStat').text() + "</span></p>");
+  }
+
+  //Hides ship data and shows noshipsdata JOS shipname = NULL niin tämä, jos ei niin showShip.
+  function hideShipData() {
+    var shipName = $('#shipName').text()
+    if (shipName) {
+      shipData.style.display = "flex";
+      noShips.style.display = "none";
+      loadingScreen.style.display = "none";
+      aboutPage.style.display = "none";
+      calculateEta();
+      moveMarker();
+      updateInfoWindowContent();
+    }
+    else {
+      shipData.style.display = "none";
+      loadingScreen.style.display = "none";
+      aboutPage.style.display = "none";
+      noShips.style.display = "block";
+    }
+  }
+
+  //Shows about page
+  $('#aboutPageButton').click(function () {
+    shipData.style.display = "none";
+    loadingScreen.style.display = "none";
+    aboutPage.style.display = "block";
+    noShips.style.display = "none";
+  })
+
+  //Updates ship data in x seconds interval
+  setInterval(function () {
+    $.ajax({
+      type: 'POST',
+      url: '/',
+    })
+      .done(function (data) {
+        $('#shipName').text(data.shipName);
+        $('#mmsi').text(data.mmsi);
+        $('#course').text(data.course);
+        $('#length').text(data.length);
+        $('#width').text(data.width);
+        $('#draught').text(data.draught);
+        $('#flag').text(data.flag);
+        $('#shipType').text(data.shipType);
+        $('#distance').text(data.distance);
+        $('#speed').text(data.speed);
+        $('#destination').text(data.destination);
+        $('#navStat').text(data.navStat);
+        $('#latitude').text(data.latitude);
+        $('#longitude').text(data.longitude);
+        $('#shipPhoto').attr('src', data.image);
+        hideShipData();
       });
-      //custom icon
-      var icon = {
-        url: "https://image.flaticon.com/icons/svg/3455/3455497.svg",
-        scaledSize: new google.maps.Size(50, 50), // scaled size
-      };
+  }, 5000);
 
-      // The marker, positioned at ship
-      marker = new google.maps.Marker({
-        position: new google.maps.LatLng(lat, lng),
-        map: map,
-        icon: icon,
-        anchor: new google.maps.Point(25, 25)
-      });
-      marker.addListener("click", () => {
-        infoWindow.open(map, marker);
-      });
-    }
-
-    //Updates ship marker position in the map
-    function moveMarker() {
-      lat = parseFloat($('#latitude').html());
-      lng = parseFloat($('#longitude').html());
-      var newLatLng = new google.maps.LatLng(lat, lng);
-      marker.setPosition(newLatLng);
-      map.setCenter(newLatLng);
-    }
-
-    //Estimates how long time it takes for ship to arrive in Mustola
-    function calculateEta() {
-      speed = $('#speed').text()
-      distance = $('#distance').text()
-      const eta = Math.round((distance / (speed * 1.852)) * 60)
-      $('#eta').text(eta);
-    }
-
-    function updateInfoWindowContent() {
-      infoWindow.setContent("<div style='float:right; padding: 10px;'>" +
-          "<p><strong>MMSI: </strong><span>" + $('#mmsi').text() + "</span></p>" +
-          "<p><strong>Määränpää: </strong><span>"+ $('#destination').text() + "</span></p>" +
-          "<p><strong>Nopeus: </strong><span>"+ $('#speed').text() + "</span> solmua</p>" +
-          "<p><strong>Pituus/leveys/syväys: </strong><span>"+ $('#length').text() + "</span><span> / </span><span>"+ $('#width').text() + "</span><span> / </span><span>"+ $('#draught').text() + "</span> m</p>" +
-          "<p><strong>Status: </strong><span>"+ $('#navStat').text() + "</span></p>");
-    }
-
-    //Hides ship data and shows noshipsdata JOS shipname = NULL niin tämä, jos ei niin showShip.
-    function hideShipData() {
-      var shipName = $('#shipName').text()
-      if (shipName) {
-        shipData.style.display = "flex";
-        noShips.style.display = "none";
-        loadingScreen.style.display = "none";
-        calculateEta();
-        moveMarker();
-        updateInfoWindowContent();
-      }
-      else {
-        shipData.style.display = "none";
-        noShips.style.display = "flex";
-        loadingScreen.style.display = "none";
-      }
-    }
-
-    //Updates ship data in x seconds interval
-    setInterval(function () {
-      $.ajax({
-        type: 'POST',
-        url: '/',
-      })
-        .done(function (data) {
-          $('#shipName').text(data.shipName);
-          $('#mmsi').text(data.mmsi);
-          $('#course').text(data.course);
-          $('#length').text(data.length);
-          $('#width').text(data.width);
-          $('#draught').text(data.draught);
-          $('#flag').text(data.flag);
-          $('#shipType').text(data.shipType);
-          $('#distance').text(data.distance);
-          $('#speed').text(data.speed);
-          $('#destination').text(data.destination);
-          $('#navStat').text(data.navStat);
-          $('#latitude').text(data.latitude);
-          $('#longitude').text(data.longitude);
-          $('#shipPhoto').attr('src', data.image);
-          hideShipData();
-        });
-    }, 5000);
-
-  </script>
+</script>
 {% endblock %}
