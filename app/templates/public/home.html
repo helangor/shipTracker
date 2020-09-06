@@ -18,30 +18,40 @@
 
 <!--About page-->
 <div class="container" id="aboutPage">
-  <h4>Laivatutka</h4>
-  <p>Mustolan sulkuun saapuvia laivoja seuraava tutka</p>
-  <p>Sivusto päivittyy automaattisesti</p>
-  <p>Kriteereitä laivoille:</p>
-  <ul>
-    <li>Laiva on Saimaan kanavan alueella</li>
-    <li>Laiva on tulossa kohti Mustolan sulkua</li>
-    <li>Laivan status ei ole "Ankkurissa" tai "Kiinnitettynä"</li>
-  </ul>
-  <p>Tutka näyttää aina Mustolaa lähinnä olevan laivan.</p>
-  <hr>
+  <div class="row">
+    <div class="col-lg-5 col-md-5 col-sm-10 shipInfo">
+      <h4>Laivatutka</h4>
+      <p>Mustolan sulkuun saapuvia laivoja seuraava tutka</p>
+      <p>Sivusto päivittyy automaattisesti</p>
+      <p>Kriteereitä laivoille:</p>
+      <ul>
+        <li>Laiva on Saimaan kanavan alueella</li>
+        <li>Laiva on tulossa kohti Mustolan sulkua</li>
+        <li>Laivan status ei ole "Ankkurissa" tai "Kiinnitettynä"</li>
+      </ul>
+      <p>Tutka näyttää aina Mustolaa lähinnä olevan laivan.</p>
+      <hr>
 
-  <h4>Mistä tiedot tulevat?</h4>
-  <p>Laivoissa käytetään <a href="https://fi.wikipedia.org/wiki/AIS-j%C3%A4rjestelm%C3%A4">AIS-järjestelmää</a>, joka lähettää tietoa mm. laivan sijainnista. </p>
-  <p>Nämä sijaintitiedot saadaan <a href="https://www.digitraffic.fi/">Digitrafficin</a> avoimen datan rajapinnan kautta.</p>
-  <p>Lisäksi joitakin lisätietoja mm. laivan kuva, saadaan ulkopuoliselta sivustolta.</p>
-  <hr>
+      <h4>Mistä tiedot tulevat?</h4>
+      <p>Laivoissa käytetään <a href="https://fi.wikipedia.org/wiki/AIS-j%C3%A4rjestelm%C3%A4">AIS-järjestelmää</a>,
+        joka
+        lähettää tietoa mm. laivan sijainnista. </p>
+      <p>Nämä sijaintitiedot saadaan <a href="https://www.digitraffic.fi/">Digitrafficin</a> avoimen datan rajapinnan
+        kautta.</p>
+      <p>Lisäksi joitakin lisätietoja mm. laivan kuva, saadaan ulkopuoliselta sivustolta.</p>
+      <hr>
 
-  <h4>Käytetyt teknologiat</h4>
-  <p>Python, JavaScript, HTML, CSS, jQuery, Ajax, Flask, Bootstrap</p>
-  <hr>
+      <h4>Käytetyt teknologiat</h4>
+      <p>Python, JavaScript, HTML, CSS, jQuery, Ajax, Flask, Bootstrap</p>
+      <hr>
 
-  <h4>Tekijä</h4>
-  <p>Henrikki Helander: <a href="https://helangor.github.io/portfolio/">Lisää tietoa tekijästä</a></p>
+      <h4>Tekijä</h4>
+      <p>Henrikki Helander: <a href="https://helangor.github.io/portfolio/">Lisää tietoa tekijästä</a></p>
+    </div>
+    <div class="col-lg-7 col-md-7 col-sm-10">
+      <img id=examplePhoto src="{{url_for('static', filename='img/esimerkkikuva.jpg')}}" alt="Example photo">
+    </div>
+  </div>
 </div>
 
 <!--Div which shows when ships are coming towards to Mustola-->
@@ -66,7 +76,7 @@
     <p hidden id=draught>{{ draught }}</p>
   </div>
 
-  <!--Lisätään kartta, jossa näkyy laiva-->
+  <!--Adds google maps, with Ship marker-->
   <div class="col-lg-8 col-md-8 col-sm-10">
     <div id="map"></div>
     <script defer
@@ -142,6 +152,7 @@
     $('#eta').text(eta);
   }
 
+  //Updates maps info window content
   function updateInfoWindowContent() {
     infoWindow.setContent("<div style='float:right; padding: 10px;'>" +
       "<p><strong>MMSI: </strong><span>" + $('#mmsi').text() + "</span></p>" +
@@ -173,13 +184,13 @@
 
   //Shows about page
   $('.aboutPageButton').click(function (event) {
+    clearInterval(intervalId);
     event.stopPropagation();
     event.stopImmediatePropagation();
     shipData.style.display = "none";
     loadingScreen.style.display = "none";
     aboutPage.style.display = "block";
     noShips.style.display = "none";
-    clearInterval(intervalId);
   })
 
   //Updates ship data in x seconds interval

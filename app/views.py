@@ -10,18 +10,19 @@ from math import sin, cos, sqrt, atan2, radians
 from bs4 import BeautifulSoup
 from pymongo import MongoClient
 
-#TODO About sivulle tarkemmin, millä kriteereillä laivat otetaan. 
 #TODO suurenna hieman aluetta mistä ottaa laivat mustolan ympärillä. 
 #TODO Tee ladataan laivoja juttuun joku laiva animaatio
 #TODO Lisää AboutPage blockiksi.
 #TODO JS erilliseen tiedostoon
 #TODO Lisää NoScript 
 
+#Gives current time in ISO format
 def iso_time():
     current_time = (datetime.utcnow()- timedelta(hours = 0.005)).isoformat().replace(":", "%3A")
     iso_time = current_time[:23] + ".000Z"
     return iso_time
 
+#Calculates the difference between two coordinate points in km
 def calculate_distance(lat1,lon1,lat2,lon2):
     # approximate radius of earth in km
     R = 6373.0
@@ -36,6 +37,7 @@ def calculate_distance(lat1,lon1,lat2,lon2):
     distance = R * c
     return round(distance,2)
 
+#Changes ship type from number value to text
 def get_ship_type(shipTypeNumber):
     if 20 < shipTypeNumber <= 29:
         shipType = "Patosiipialus (WIG)"
@@ -83,6 +85,7 @@ def get_nav_status(nav_stat_number):
 
     return nav_stat
                 
+#Returns extra data from ship
 def get_ship_data(mmsi, imo):
     #If imo not found, use mmsi to find ships page
     if imo==0:
@@ -123,8 +126,6 @@ def get_ship_data(mmsi, imo):
     #Change Width and length "12.0 m" format to float "12.0"
     width = float(vessels["Width:"].split(" ")[0])
     length = float(vessels["Length:"].split(" ")[0]) 
-    
-    #Tähän returnin sijasta tallennus tauluun 
     return mmsi, flag, width, length, ship_photo_url
 
 #Saves scraped ship data to DB
@@ -148,10 +149,8 @@ def save_ship_to_DB(shipData, mmsi,imo, shipName, shipType, draught):
 def get_closest_ship(location_data, radius, homeLat, homeLong):
     shortest_distance = radius
     closest_ship = {}
-    #Tähän omana funktiona lähimmän laivan tietojen etsiminen ja palauttaa sen JSONin.
-    
+
     for p in location_data['features']: 
-        #Getting navigation status, course and coordinates
         nav_stat = p['properties']['navStat']
         course = p['properties']['cog']     
         long = p['geometry']['coordinates'][0]
@@ -162,7 +161,6 @@ def get_closest_ship(location_data, radius, homeLat, homeLong):
         if nav_stat not in (1,5) and (lat < 61.0804652 and long > 28.2754649) and (((200 < course < 360) and lat < homeLat and long > homeLong) or ((30 < course < 180) and lat > homeLat and long < homeLong)):
         #if nav_stat not in (1,5):
 
-            #Calculating distance       
             longitude = p['geometry']['coordinates'][0]
             latitude = p['geometry']['coordinates'][1]
             distance = calculate_distance(homeLat, homeLong, latitude, longitude)
@@ -176,7 +174,6 @@ def get_closest_ship(location_data, radius, homeLat, homeLong):
 
 #Fetches ship information from API
 def fetch_ships():
-
     #Sets api_call parameters
     home_coordinates = [61.058983,28.320951]
     radius = 40 #Normal value 40km 
@@ -187,7 +184,6 @@ def fetch_ships():
     location_data = (response.json())
     ship = get_closest_ship(location_data, radius, home_coordinates[0], home_coordinates[1])
 
-    #Kun lähin laiva tiedossa niin valitaan sen tiedot. Jos JSON empty niin return 0
     speed = ship['properties']['sog']
     mmsi = ship['mmsi']
     course = ship['properties']['cog']
@@ -195,11 +191,10 @@ def fetch_ships():
     latitude = ship['geometry']['coordinates'][1]
     distance = calculate_distance(home_coordinates[0],home_coordinates[1],latitude,longitude)
     
-    #Change nav_status type from number to name. e.g 5 = moored
     nav_stat_number = ship['properties']['navStat']
     nav_stat = get_nav_status(nav_stat_number)
 
-    #Getting more specific shipdata from API
+    #Getting more specific shipdata from different API
     vessel_details_api_call = "https://meri.digitraffic.fi/api/v1/metadata/vessels/" + str(mmsi)
     response = requests.get(vessel_details_api_call)
     details = (response.json())
@@ -225,14 +220,13 @@ def fetch_ships():
     else:
         save_ship_to_DB(shipData, mmsi, imo, shipName, shipType, draught)
     
-    #Haetaan DB:stä aikaisemmin sinne raavitut tiedot
+    #Fetches ship data from DB
     cursor = shipData.find_one( {'mmsi': mmsi })
     flag = cursor['flag']
     width = cursor['width']
     length = cursor['length']
     image = cursor['image']
-
-    #Palauteteaan tiedot
+    
     return (shipName, mmsi, course, distance, destination, speed, width, length, flag, image, nav_stat, shipType, draught, latitude, longitude)
 
 @app.route("/", methods=["GET", "POST"])
