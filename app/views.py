@@ -14,7 +14,6 @@ from pymongo import MongoClient
 #TODO Tee ladataan laivoja juttuun joku laiva animaatio
 #TODO Lisää AboutPage blockiksi.
 #TODO JS erilliseen tiedostoon
-#TODO Lisää NoScript 
 
 #Gives current time in ISO format
 def iso_time():
