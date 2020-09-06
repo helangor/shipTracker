@@ -157,7 +157,7 @@ def get_closest_ship(location_data, radius, homeLat, homeLong):
 
         """Only ships that are coming towards and are moving, Ship status has to be something else than anchored
         Ship needs to be in the channel and not in lake Saimaa. Ship is coming towards to Mustola channel"""
-        if nav_stat not in (1,5) and (lat < 61.0804652 and long > 28.2754649) and (((200 < course < 360) and lat < homeLat and long > homeLong) or ((30 < course < 180) and lat > homeLat and long < homeLong)):
+        if nav_stat not in (1,5) and (lat < 61.0804652 and long > 28.2754649) and ((((200 < course < 360) or course < 10) and lat < homeLat and long > homeLong) or ((30 < course < 190) and lat > homeLat and long < homeLong)):
         #if nav_stat not in (1,5):
 
             longitude = p['geometry']['coordinates'][0]
@@ -179,6 +179,7 @@ def fetch_ships():
     current_time = iso_time()
 
     api_call = "https://meri.digitraffic.fi/api/v1/locations/latitude/" + str(home_coordinates[0]) +"/longitude/" + str(home_coordinates[1]) + "/radius/" + str(radius) + "/from/" + current_time
+    print(api_call)
     response = requests.get(api_call)
     location_data = (response.json())
     ship = get_closest_ship(location_data, radius, home_coordinates[0], home_coordinates[1])
