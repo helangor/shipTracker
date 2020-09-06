@@ -16,6 +16,7 @@ from pymongo import MongoClient
 #TODO Tee ladataan laivoja juttuun joku laiva animaatio
 #TODO Lisää AboutPage blockiksi.
 #TODO JS erilliseen tiedostoon
+#TODO Lisää NoScript 
 
 def iso_time():
     current_time = (datetime.utcnow()- timedelta(hours = 0.005)).isoformat().replace(":", "%3A")
@@ -179,7 +180,7 @@ def fetch_ships():
 
     #Sets api_call parameters
     home_coordinates = [61.058983,28.320951]
-    radius = 40
+    radius = 4 #Normal value 40km 
     current_time = iso_time()
 
     api_call = "https://meri.digitraffic.fi/api/v1/locations/latitude/" + str(home_coordinates[0]) +"/longitude/" + str(home_coordinates[1]) + "/radius/" + str(radius) + "/from/" + current_time

@@ -12,18 +12,19 @@
 <!--Div which shows when no ships are coming towards to Mustola-->
 <div class="container" id="noShips">
   <h1>Mustolaa kohti tulevia laivoja ei ole tällä hetkellä kanavassa</h1>
-  <p>Lue lisää täältä</p>
+  <p>Lisää tietoa laivatutkasta<a class="aboutPageButton" href="#"><strong> täältä</strong></a></p>
 </div>
 
 <!--About page-->
 <div class="container" id="aboutPage">
   <h4>Laivatutka</h4>
   <p>Mustolan sulkuun saapuvia laivoja seuraava tutka</p>
+  <p>Mitä tämä tekee ja Millaiset laivat otetaan mukaan?</p>
+  <p>AIS mikä sen on mihin perustuu, mistä data saadaan?</p>
   <hr>
 
   <h4>Käytetyt teknologiat</h4>
-  <p>Python, JavaScript, HTML, CSS</p>
-  <p>jQuery, Ajax, Flask, Bootstrap</p>
+  <p>Python, JavaScript, HTML, CSS, jQuery, Ajax, Flask, Bootstrap</p>
   <hr>
 
   <h4>Tekijä</h4>
@@ -68,6 +69,7 @@
   var lng;
   var speed = $('#speed').text()
   var distance = $('#distance').text()
+  var intervalId;
 
 
   //Initializing map
@@ -136,7 +138,7 @@
       "<p><strong>Status: </strong><span>" + $('#navStat').text() + "</span></p>");
   }
 
-  //Hides ship data and shows noshipsdata JOS shipname = NULL niin tämä, jos ei niin showShip.
+  //Decides what page to shows depending is there ships or not in the canal
   function hideShipData() {
     var shipName = $('#shipName').text()
     if (shipName) {
@@ -157,15 +159,19 @@
   }
 
   //Shows about page
-  $('#aboutPageButton').click(function () {
+  $('.aboutPageButton').click(function (event) {
+    event.stopPropagation();
+    event.stopImmediatePropagation();
     shipData.style.display = "none";
     loadingScreen.style.display = "none";
     aboutPage.style.display = "block";
     noShips.style.display = "none";
+    clearInterval(intervalId);
   })
 
   //Updates ship data in x seconds interval
-  setInterval(function () {
+  function shipInterval() {
+    console.log("Ship interval function is ON")
     $.ajax({
       type: 'POST',
       url: '/',
@@ -188,7 +194,8 @@
         $('#shipPhoto').attr('src', data.image);
         hideShipData();
       });
-  }, 5000);
+  }
+  intervalId = setInterval(shipInterval, 5000);
 
 </script>
 {% endblock %}
