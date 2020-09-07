@@ -10,6 +10,7 @@ from math import sin, cos, sqrt, atan2, radians
 from bs4 import BeautifulSoup
 from pymongo import MongoClient
 
+#TODO iffin korjaus, nyt välillä tulee väärään suuntaan meneviä laivoja läpi
 #TODO suurenna hieman aluetta mistä ottaa laivat mustolan ympärillä. 
 #TODO Tee ladataan laivoja juttuun joku laiva animaatio
 #TODO Lisää AboutPage blockiksi.
