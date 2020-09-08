@@ -1,0 +1,1 @@
+mongodb+srv://dbUser:3NSPv8pakvWLUne@mustola.g1flp.mongodb.net/ships?retryWrites=true&w=majority

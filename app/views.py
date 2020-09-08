@@ -9,8 +9,11 @@ from datetime import datetime, timedelta
 from math import sin, cos, sqrt, atan2, radians
 from bs4 import BeautifulSoup
 from pymongo import MongoClient
+from dotenv import load_dotenv
+ 
 
 #TODO iffin korjaus, nyt välillä tulee väärään suuntaan meneviä laivoja läpi
+#TODO mongodb juttu
 #TODO suurenna hieman aluetta mistä ottaa laivat mustolan ympärillä. 
 #TODO Jos aika yli 60min niin laita -> yli 1h.
 #TODO laivan markeria vieläkin alemmas
@@ -212,7 +215,12 @@ def fetch_ships():
     shipType = get_ship_type (shipTypeNumber)
 
     #Open connection to mongoDB 
-    client = MongoClient("mongodb+srv://dbUser:3NSPv8pakvWLUne@mustola.g1flp.mongodb.net/ships?retryWrites=true&w=majority")
+    file1 = open('mongodb.txt', 'r') 
+    lines = file1.readlines() 
+    mongodb = lines[0]
+    print(mongodb)
+
+    client = MongoClient(mongodb)
 
     db = client.ships
     shipData = db.shipDetails
