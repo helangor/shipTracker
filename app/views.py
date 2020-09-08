@@ -162,8 +162,8 @@ def get_closest_ship(location_data, radius, homeLat, homeLong):
 
         """Only ships that are coming towards and are moving, Ship status has to be something else than anchored
         Ship needs to be in the channel and not in lake Saimaa. Ship is coming towards to Mustola channel"""
-        if (nav_stat not in (1,5) and (lat < 61.0804652 and long > 28.2754649)) and ((((200 <= course <= 360) or course <= 10) and lat < homeLat and long > homeLong) or ((30 <= course <= 190) and lat > homeLat and long < homeLong)):
-        #if nav_stat not in (1,5) and (lat < 61.0804652 and long > 28.2754649) and ((((200 < course < 360) or course < 10) and lat < homeLat and long > homeLong) or ((30 < course < 190) and lat > homeLat and long < homeLong)):
+        #if (nav_stat not in (1,5) and (lat < 61.0804652 and long > 28.2754649)) and ((((200 <= course <= 360) or course <= 10) and lat < homeLat and long > homeLong) or ((30 <= course <= 190) and lat > homeLat and long < homeLong)):
+        if nav_stat not in (1,5) and (lat < 61.0804652 and long > 28.2754649) and ((((200 < course < 360) or course < 10) and lat < homeLat and long > homeLong) or ((30 < course < 190) and lat > homeLat and long < homeLong)):
         #if nav_stat not in (1,5):
 
             longitude = p['geometry']['coordinates'][0]
@@ -214,12 +214,15 @@ def fetch_ships():
     shipType = get_ship_type (shipTypeNumber)
 
     #Open connection to mongoDB 
-    file1 = open('mongodb.txt', 'r') 
-    lines = file1.readlines() 
-    mongodb = lines[0]
-    print(mongodb)
+    try:
+        file1 = open('app\mongodb.txt', 'r') 
+        lines = file1.readlines() 
+        mongodb = lines[0]
+    except:
+        print("Error")
 
     client = MongoClient(mongodb)
+
 
     db = client.ships
     shipData = db.shipDetails
