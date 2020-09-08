@@ -13,7 +13,6 @@ from dotenv import load_dotenv
  
 
 #TODO iffin korjaus, nyt välillä tulee väärään suuntaan meneviä laivoja läpi
-#TODO mongodb juttu
 #TODO suurenna hieman aluetta mistä ottaa laivat mustolan ympärillä. 
 #TODO Jos aika yli 60min niin laita -> yli 1h.
 #TODO laivan markeria vieläkin alemmas
