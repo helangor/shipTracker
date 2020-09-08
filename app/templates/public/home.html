@@ -33,11 +33,8 @@
       <hr>
 
       <h4>Mistä tiedot tulevat?</h4>
-      <p>Laivoissa käytetään <a href="https://fi.wikipedia.org/wiki/AIS-j%C3%A4rjestelm%C3%A4">AIS-järjestelmää</a>,
-        joka
-        lähettää tietoa mm. laivan sijainnista. </p>
-      <p>Nämä sijaintitiedot saadaan <a href="https://www.digitraffic.fi/">Digitrafficin</a> avoimen datan rajapinnan
-        kautta.</p>
+      <p>Laivoissa käytetään <a href="https://fi.wikipedia.org/wiki/AIS-j%C3%A4rjestelm%C3%A4">AIS-järjestelmää</a>,joka lähettää tietoa mm. laivan sijainnista. </p>
+      <p>Nämä sijaintitiedot saadaan <a href="https://www.digitraffic.fi/">Digitrafficin</a> avoimen datan rajapinnan kautta.</p>
       <p>Lisäksi joitakin lisätietoja mm. laivan kuva, saadaan ulkopuoliselta sivustolta.</p>
       <hr>
 
@@ -59,7 +56,7 @@
     <p><strong>Laivan tyyppi: </strong><span id="shipType">{{ shipType }}</span></p>
     <p><strong>Maa: </strong><span id="flag">{{ flag }}</span></p>
     <p><strong>Etäisyys Mustolasta: </strong><span id="distance">{{ distance }}</span> <span>km</span> </p>
-    <p><strong>ETA: </strong><span id="eta">--</span> minuuttia</p>
+    <p><strong>ETA: </strong><span id="eta">--</span></p>
     <img id=shipPhoto src={{ image or 'https://www.vesseltracker.com/assets/img/gen_img_ship.png' }} alt="Ship photo">
     <p hidden id=latitude>{{ latitude }}</p>
     <p hidden id=longitude>{{ longitude }}</p>
@@ -125,7 +122,7 @@
       position: new google.maps.LatLng(lat, lng),
       map: map,
       icon: icon,
-      anchor: new google.maps.Point(25, 25)
+      anchor: new google.maps.Point(50, 50)
     });
     marker.addListener("click", () => {
       infoWindow.open(map, marker);
@@ -145,7 +142,16 @@
   function calculateEta() {
     speed = $('#speed').text()
     distance = $('#distance').text()
-    const eta = Math.round((distance / (speed * 1.852)) * 60)
+    var eta = Math.round((distance / (speed * 1.852)) * 60)
+    if (eta > 500) {
+      eta = "Aikaa ei pystytä määrittämään"
+    } else if (eta > 120) {
+      eta = "Yli 2h"
+    } else if (eta > 60) {
+      eta = "Yli 1h"
+    } else {
+      eta = eta + " minuuttia"
+    }
     $('#eta').text(eta);
   }
 
@@ -192,7 +198,6 @@
 
   //Updates ship data in x seconds interval
   function shipInterval() {
-    console.log("Ship interval function is ON")
     $.ajax({
       type: 'POST',
       url: '/',
