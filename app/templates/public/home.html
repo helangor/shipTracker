@@ -165,7 +165,7 @@
       "<p><strong>Status: </strong><span>" + $('#navStat').text() + "</span></p>");
   }
 
-  //Decides what page to shows depending is there ships or not in the canal
+  //Decides what pages to show depending is there ships or not in the canal
   function hideShipData() {
     var shipName = $('#shipName').text()
     if (shipName) {
@@ -196,7 +196,7 @@
     noShips.style.display = "none";
   })
 
-  //Updates ship data in x seconds interval
+  //Refreshes ship data automatically in 5 seconds interval
   function shipInterval() {
     $.ajax({
       type: 'POST',
@@ -224,6 +224,6 @@
   intervalId = setInterval(shipInterval, 5000);
 </script>
 <noscript>
-  Your browser doesn't support JavaScript or you have disabled JavaScript. Turn JavaScript on to use this website.
+  <h1>Your browser doesn't support JavaScript or you have disabled JavaScript. Turn JavaScript on to use this website.</h1>
 </noscript>
 {% endblock %}

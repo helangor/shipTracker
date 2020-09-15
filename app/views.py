@@ -12,15 +12,12 @@ from pymongo import MongoClient
 from dotenv import load_dotenv
  
 
-#TODO iffin korjaus, nyt välillä tulee väärään suuntaan meneviä laivoja läpi
 #TODO suurenna hieman aluetta mistä ottaa laivat mustolan ympärillä. 
-#TODO Jos aika yli 60min niin laita -> yli 1h.
 #TODO laivan markeria vieläkin alemmas
 #TODO Tee ladataan laivoja juttuun joku laiva animaatio
-#TODO Lisää AboutPage blockiksi.
-#TODO JS erilliseen tiedostoon
 
-#Gives current time in ISO format
+
+#Gives the current time minus fex seconds in ISO format. If used current time, API won't return ships. 
 def iso_time():
     current_time = (datetime.utcnow()- timedelta(hours = 0.005)).isoformat().replace(":", "%3A")
     iso_time = current_time[:23] + ".000Z"
@@ -89,9 +86,9 @@ def get_nav_status(nav_stat_number):
 
     return nav_stat
                 
-#Returns extra data from ship
+#Scrapes extra ship data from 3rd party website. Used only if data is not found in DB.
 def get_ship_data(mmsi, imo):
-    #If imo not found, use mmsi to find ships page
+    #If imo not found, uses mmsi to find ships page
     if imo==0:
         site = 'https://www.vesseltracker.com/en/vessels.html?term=' + str(mmsi)
         response = requests.get(site)
@@ -101,7 +98,6 @@ def get_ship_data(mmsi, imo):
             link = links.find('a', href=True)
             ship_link = link.get('href')
         site = "https://www.vesseltracker.com" + ship_link
-    #If IMO exists use that
     else:
         site = "https://vesseltracker.com/en/Ships/" + str(imo) + ".html"
         
